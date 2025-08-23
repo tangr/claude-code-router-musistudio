@@ -3,6 +3,8 @@ services:
     build: .
     ports:
       - "3456:3456"
+    environment:
+      - OPENAI_API_KEY=value
     volumes:
-      - ~/.claude-code-router:/root/.claude-code-router
+      - ./config.json:/root/.claude-code-router/config.json
     restart: unless-stopped
