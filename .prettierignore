@@ -1,0 +1,13 @@
+node_modules/
+build/
+dist/
+coverage/
+*.min.js
+*.map
+
+# **/*.html
+# **/*.md
+
+# Ignore artifacts:
+build
+coverage

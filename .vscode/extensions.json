@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.black-formatter",
+    "ms-vscode.vscode-docker",
+    "yzhang.markdown-all-in-one",
+    "ms-vscode.vscode-json",
+    "redhat.vscode-yaml",
+    "humao.rest-client",
+    "ms-vscode.remote-containers"
+  ]
+}
