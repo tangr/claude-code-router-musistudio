@@ -1,10 +1,30 @@
 {
-  "log": true,
+  "LOG": true,
+  "LOG_LEVEL": "debug",
+  "CLAUDE_PATH": "",
   "HOST": "0.0.0.0",
   "PORT": 3456,
-  "APIKEY": "1",
-  "NON_INTERACTIVE_MODE": true,
-  "OPENAI_API_KEY": "${{ secrets.OPENAI_API_KEY }}",
-  "OPENAI_BASE_URL": "https://api.deepseek.com",
-  "OPENAI_MODEL": "deepseek-chat"
+  "APIKEY": "sxuy20U66N0yTiJS",
+  "API_TIMEOUT_MS": "600000",
+  "PROXY_URL": "",
+  "transformers": [],
+  "Providers": [],
+  "StatusLine": {
+    "enabled": false,
+    "currentStyle": "default",
+    "default": {
+      "modules": []
+    },
+    "powerline": {
+      "modules": []
+    }
+  },
+  "Router": {
+    "default": "",
+    "background": "",
+    "think": "",
+    "longContext": "",
+    "longContextThreshold": 60000,
+    "webSearch": ""
+  }
 }
