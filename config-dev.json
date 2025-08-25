@@ -5,7 +5,7 @@
   "CLAUDE_PATH": "",
   "HOST": "0.0.0.0",
   "PORT": 3456,
-  "APIKEY": "$LITELLM_API_KEY",
+  "APIKEY": "$ADMIN_KEY",
   "DYNAMIC_API_KEY": true,
   "API_TIMEOUT_MS": "600000",
   "PROXY_URL": "",
