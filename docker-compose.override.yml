@@ -5,6 +5,7 @@ services:
       - "3456:3456"
     environment:
       - OPENAI_API_KEY=value
+      - LITELLM_API_KEY=${LITELLM_API_KEY}
     volumes:
       - ./config-dev.json:/root/.claude-code-router/config.json
       - ./logs/:/root/.claude-code-router/logs/
