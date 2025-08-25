@@ -17,4 +17,5 @@ export const DEFAULT_CONFIG = {
   OPENAI_API_KEY: "",
   OPENAI_BASE_URL: "",
   OPENAI_MODEL: "",
+  DYNAMIC_API_KEY: false, // Enable dynamic API key mode from client requests
 };
