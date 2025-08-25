@@ -1,14 +1,23 @@
 {
   "LOG": true,
   "LOG_LEVEL": "debug",
+  "LOGNAME": "./logs/ccr.log",
   "CLAUDE_PATH": "",
   "HOST": "0.0.0.0",
   "PORT": 3456,
-  "APIKEY": "sxuy20U66N0yTiJS",
+  "APIKEY": "$LITELLM_API_KEY",
+  "DYNAMIC_API_KEY": true,
   "API_TIMEOUT_MS": "600000",
   "PROXY_URL": "",
   "transformers": [],
-  "Providers": [],
+  "Providers": [
+    {
+      "name": "litellm",
+      "api_base_url": "http://host.docker.internal:4000/v1/chat/completions",
+      "api_key": "$LITELLM_API_KEY",
+      "models": ["claude-sonnet-4-20250514"]
+    }
+  ],
   "StatusLine": {
     "enabled": false,
     "currentStyle": "default",
@@ -20,7 +29,7 @@
     }
   },
   "Router": {
-    "default": "",
+    "default": "litellm,claude-sonnet-4-20250514",
     "background": "",
     "think": "",
     "longContext": "",
