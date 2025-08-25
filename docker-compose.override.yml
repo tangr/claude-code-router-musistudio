@@ -7,4 +7,5 @@ services:
       - OPENAI_API_KEY=value
     volumes:
       - ./config-dev.json:/root/.claude-code-router/config.json
+      - ./logs/:/root/.claude-code-router/logs/
     restart: unless-stopped
