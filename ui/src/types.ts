@@ -62,6 +62,7 @@ export interface Config {
   APIKEY: string;
   API_TIMEOUT_MS: string;
   PROXY_URL: string;
+  DYNAMIC_API_KEY?: boolean; // Enable dynamic API key mode from client requests
 }
 
 export type AccessLevel = 'restricted' | 'full';
