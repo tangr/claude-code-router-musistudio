@@ -1,4 +1,5 @@
 node_modules
+.claude-code-router/
 .claude/settings.local.json
 .env
 log.txt
