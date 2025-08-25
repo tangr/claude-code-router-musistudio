@@ -133,6 +133,47 @@
 4. **测试**: 使用 `ccr code "测试提示"` 测试路由行为
 5. **调试**: 检查 `~/.claude-code-router/logs/` 目录中的日志
 
+## 动态 API 密钥支持
+
+claude-code-router 现在支持从客户端请求头动态获取 ANTHROPIC_AUTH_TOKEN，使其能够作为多用户服务端使用。
+
+### 启用动态 API 密钥模式
+
+在配置文件中设置：
+
+```json
+{
+  "DYNAMIC_API_KEY": true,
+  "HOST": "0.0.0.0",
+  "PORT": 3456
+}
+```
+
+### 客户端使用方法
+
+客户端发送请求时，需要在 HTTP 头中包含 ANTHROPIC_AUTH_TOKEN：
+
+```bash
+# 使用Authorization头
+curl -X POST http://your-server:3456/v1/messages \
+  -H "Authorization: Bearer sk-ant-your-token-here" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"claude-3-5-sonnet-20241022","messages":[{"role":"user","content":"Hello"}]}'
+
+# 或使用x-api-key头
+curl -X POST http://your-server:3456/v1/messages \
+  -H "x-api-key: sk-ant-your-token-here" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"claude-3-5-sonnet-20241022","messages":[{"role":"user","content":"Hello"}]}'
+```
+
+### 工作原理
+
+1. 启用 `DYNAMIC_API_KEY: true` 后，认证中间件会跳过静态 API 密钥验证
+2. 路由中间件会从请求头中提取 ANTHROPIC_AUTH_TOKEN
+3. 动态地将提取的 token 应用到相应的 provider 配置中
+4. 每个请求都可以使用不同的 API 密钥，实现多用户支持
+
 ## 重要说明
 
 - 无论如何你都不能自动提交 git
