@@ -139,6 +139,70 @@ const getUseModel = async (
   return config.Router!.default;
 };
 
+const getDynamicApiKey = (req: any): string | null => {
+  // Try to get ANTHROPIC_AUTH_TOKEN from request headers
+  const authHeaderValue = req.headers.authorization || req.headers["x-api-key"];
+
+  if (!authHeaderValue) {
+    return null;
+  }
+
+  const authKey: string = Array.isArray(authHeaderValue)
+    ? authHeaderValue[0]
+    : authHeaderValue;
+
+  let token = "";
+  if (authKey.startsWith("Bearer")) {
+    token = authKey.split(" ")[1];
+  } else {
+    token = authKey;
+  }
+
+  return token || null;
+};
+
+const applyDynamicApiKey = (req: any, config: any, dynamicApiKey: string | null) => {
+  if (!config.DYNAMIC_API_KEY) {
+    return config;
+  }
+
+  // Create a deep copy of the config to avoid modifying the original
+  const configCopy = JSON.parse(JSON.stringify(config));
+
+  // If dynamic API key is available, apply it
+  if (dynamicApiKey) {
+    // Clean the dynamic API key (remove Bearer prefix if present)
+    const cleanApiKey = dynamicApiKey.replace(/^Bearer\s+/i, '');
+
+    // Apply dynamic API key to all providers that support Anthropic models
+    if (configCopy.Providers) {
+      configCopy.Providers.forEach((provider: any) => {
+        // Check if provider has Anthropic models (claude models) or doesn't have api_key set
+        if (provider.models && provider.models.some((model: string) =>
+          model.toLowerCase().includes("claude") ||
+          provider.name.toLowerCase().includes("anthropic")
+        )) {
+          provider.api_key = cleanApiKey;
+        }
+      });
+    }
+  } else if (configCopy.Providers) {
+    // If no dynamic API key provided but DYNAMIC_API_KEY is enabled,
+    // ensure providers that need API keys but don't have them are flagged
+    configCopy.Providers.forEach((provider: any) => {
+      if (provider.models && provider.models.some((model: string) =>
+        model.toLowerCase().includes("claude") ||
+        provider.name.toLowerCase().includes("anthropic")
+      ) && !provider.api_key) {
+        // Set a placeholder to indicate missing API key
+        provider.api_key = null;
+      }
+    });
+  }
+
+  return configCopy;
+};
+
 export const router = async (req: any, _res: any, config: any) => {
   // Parse sessionId from metadata.user_id
   if (req.body.metadata?.user_id) {
@@ -147,6 +211,23 @@ export const router = async (req: any, _res: any, config: any) => {
       req.sessionId = parts[1];
     }
   }
+
+  // Extract dynamic API key from request headers
+  const dynamicApiKey = getDynamicApiKey(req);
+
+  // Apply dynamic API key to config if available
+  const effectiveConfig = applyDynamicApiKey(req, config, dynamicApiKey);
+
+  // Store the effective config on the request object for later use
+  req.effectiveConfig = effectiveConfig;
+
+  // Debug logging for dynamic API key handling
+  if (config.DYNAMIC_API_KEY) {
+    log("Dynamic API key mode enabled");
+    log("Dynamic API key present:", !!dynamicApiKey);
+    log("Effective config providers:", JSON.stringify(effectiveConfig.Providers, null, 2));
+  }
+
   const lastMessageUsage = sessionUsageCache.get(req.sessionId);
   const { messages, system = [], tools }: MessageCreateParamsBase = req.body;
   try {
@@ -157,22 +238,22 @@ export const router = async (req: any, _res: any, config: any) => {
     );
 
     let model;
-    if (config.CUSTOM_ROUTER_PATH) {
+    if (effectiveConfig.CUSTOM_ROUTER_PATH) {
       try {
-        const customRouter = require(config.CUSTOM_ROUTER_PATH);
+        const customRouter = require(effectiveConfig.CUSTOM_ROUTER_PATH);
         req.tokenCount = tokenCount; // Pass token count to custom router
-        model = await customRouter(req, config);
+        model = await customRouter(req, effectiveConfig);
       } catch (e: any) {
         log("failed to load custom router", e.message);
       }
     }
     if (!model) {
-      model = await getUseModel(req, tokenCount, config, lastMessageUsage);
+      model = await getUseModel(req, tokenCount, effectiveConfig, lastMessageUsage);
     }
     req.body.model = model;
   } catch (error: any) {
     log("Error in router middleware:", error.message);
-    req.body.model = config.Router!.default;
+    req.body.model = effectiveConfig.Router!.default;
   }
   return;
 };

@@ -131,10 +131,36 @@ async function run(options: RunOptions = {}) {
   });
   server.addHook("preHandler", async (req: any, reply: any) => {
     if (req.url.startsWith("/v1/messages")) {
-      router(req, reply, config);
+      await router(req, reply, config);
+
+      // If we have an effective config with dynamic API keys, temporarily update server config
+      if (req.effectiveConfig && req.effectiveConfig !== config) {
+        // Store original config for restoration
+        req.originalServerConfig = server.config;
+
+        // Debug logging
+        console.log("Updating server config with effective providers:", JSON.stringify(req.effectiveConfig.Providers || req.effectiveConfig.providers, null, 2));
+
+        // Update server config with effective providers
+        server.config = {
+          ...server.config,
+          providers: req.effectiveConfig.Providers || req.effectiveConfig.providers,
+        };
+
+        console.log("Server config after update:", JSON.stringify(server.config.providers, null, 2));
+      } else {
+        console.log("No effective config update needed");
+        console.log("Original config providers:", JSON.stringify(config.Providers || config.providers, null, 2));
+      }
     }
   });
   server.addHook("onSend", (req: any, reply: any, payload: any, done: any) => {
+    // Restore original server config if it was temporarily changed
+    if (req.originalServerConfig && req.url.startsWith("/v1/messages")) {
+      server.config = req.originalServerConfig;
+      delete req.originalServerConfig;
+    }
+
     if (req.sessionId && req.url.startsWith("/v1/messages")) {
       if (payload instanceof ReadableStream) {
         const [originalStream, clonedStream] = payload.tee();
