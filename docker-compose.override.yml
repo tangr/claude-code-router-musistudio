@@ -4,7 +4,6 @@ services:
     ports:
       - "3456:3456"
     environment:
-      - OPENAI_API_KEY=value
       - LITELLM_API_KEY=${LITELLM_API_KEY}
       - ADMIN_KEY=${ADMIN_KEY}
     volumes:
