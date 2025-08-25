@@ -60,7 +60,7 @@ async function run(options: RunOptions = {}) {
 
   let HOST = config.HOST;
 
-  if (config.HOST && !config.APIKEY) {
+  if (!config.HOST && !config.APIKEY) {
     HOST = "127.0.0.1";
     console.warn("⚠️ API key is not set. HOST is forced to 127.0.0.1.");
   }
@@ -93,14 +93,14 @@ async function run(options: RunOptions = {}) {
   const loggerConfig =
     config.LOG !== false
       ? {
-          level: config.LOG_LEVEL || "debug",
-          stream: createWriteStream({
-            path: HOME_DIR,
-            filename: config.LOGNAME || `./logs/ccr-${+new Date()}.log`,
-            maxFiles: 3,
-            interval: "1d",
-          }),
-        }
+        level: config.LOG_LEVEL || "debug",
+        stream: createWriteStream({
+          path: HOME_DIR,
+          filename: config.LOGNAME || `./logs/ccr-${+new Date()}.log`,
+          maxFiles: 3,
+          interval: "1d",
+        }),
+      }
       : false;
 
   const server = createServer({
@@ -152,27 +152,27 @@ async function run(options: RunOptions = {}) {
             try {
               const message = JSON.parse(str);
               sessionUsageCache.put(req.sessionId, message.usage);
-            } catch {}
+            } catch { }
           }
         }
         read(clonedStream);
         done(null, originalStream)
       } else {
-        req.log.debug({payload}, 'onSend Hook')
+        req.log.debug({ payload }, 'onSend Hook')
         sessionUsageCache.put(req.sessionId, payload.usage);
         if (payload instanceof Buffer || payload instanceof Response) {
           done(null, payload);
-        } else if(typeof payload === "object") {
+        } else if (typeof payload === "object") {
           done(null, JSON.stringify(payload));
         } else {
           done(null, payload);
         }
       }
     } else {
-      if(payload instanceof Buffer || payload instanceof Response || payload === null || payload instanceof ReadableStream || payload instanceof Stream) {
+      if (payload instanceof Buffer || payload instanceof Response || payload === null || payload instanceof ReadableStream || payload instanceof Stream) {
         done(null, payload);
-      } else if(typeof payload === "object") {
-        req.log.debug({payload}, 'onSend Hook')
+      } else if (typeof payload === "object") {
+        req.log.debug({ payload }, 'onSend Hook')
         done(null, JSON.stringify(payload));
       } else {
         done(null, payload);
